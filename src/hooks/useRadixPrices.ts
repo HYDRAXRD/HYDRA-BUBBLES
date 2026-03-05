@@ -31,15 +31,23 @@ async function fetchPrices(): Promise<RadixToken[]> {
   const all = (Object.values(data) as any[])
     .filter((t) => {
       if (!t.symbol || t.tokenPriceUSD <= 0) return false;
+
       // Only Radix DLT tokens (resource_rdx addresses)
       if (t.address && !t.address.startsWith("resource_rdx")) return false;
+
       // Remove tokens without image
       const icon = t.iconUrl || t.icon_url || "";
       if (!icon || icon.trim() === "") return false;
-      // Remove tokens that start with X and contain LSU in the name
+
       const sym = (t.symbol || "").toUpperCase();
       const nm = (t.name || "").toUpperCase();
-      if (sym.startsWith("X") && (sym.includes("LSU") || nm.includes("LSU"))) return false;
+
+      // Bloqueio 1: qualquer token cujo NOME ou SIMBOLO contenha LSU
+      if (sym.includes("LSU") || nm.includes("LSU")) return false;
+
+      // Bloqueio 2: qualquer token cujo SIMBOLO comece com X
+      if (sym.startsWith("X")) return false;
+
       return true;
     })
     .map((t) => ({
@@ -51,6 +59,7 @@ async function fetchPrices(): Promise<RadixToken[]> {
 
   // Sort by USD price descending (as liquidity proxy)
   all.sort((a, b) => b.tokenPriceUSD - a.tokenPriceUSD);
+
   return all;
 }
 
