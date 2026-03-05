@@ -38,13 +38,11 @@ export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCa
   const mouseRef = useRef<{ x: number; y: number } | null>(null);
   const hoveredRef = useRef<Bubble | null>(null);
   const [canvasSize, setCanvasSize] = useState({ w: window.innerWidth, h: window.innerHeight - 56 });
-  // Update canvas size
   useEffect(() => {
     const onResize = () => setCanvasSize({ w: window.innerWidth, h: window.innerHeight - 56 });
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-  // Sync tokens to bubbles
   useEffect(() => {
     const changes = tokens.map((t) => Math.abs(getChange(t, filter)));
     const maxChange = Math.max(...changes, 1);
@@ -61,7 +59,6 @@ export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCa
         prev.targetRadius = targetRadius;
         return prev;
       }
-      // Preload icon
       if (token.iconUrl) loadImage(token.iconUrl);
       return {
         token,
@@ -89,10 +86,8 @@ export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCa
     const bubbles = bubblesRef.current;
     const mouse = mouseRef.current;
     let hovered: Bubble | null = null;
-    // Physics
     for (const b of bubbles) {
       b.radius += (b.targetRadius - b.radius) * 0.05;
-      // Mouse repulsion/attraction
       if (mouse) {
         const dx = b.x - mouse.x;
         const dy = b.y - mouse.y;
@@ -106,21 +101,18 @@ export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCa
           b.vy += dy * force;
         }
       }
-      // Gravity toward center
       const cx = w / 2, cy = h / 2;
       b.vx += (cx - b.x) * 0.00008;
       b.vy += (cy - b.y) * 0.00008;
-changeStr      b.vx *= 0.985;
+      b.vx *= 0.985;
       b.vy *= 0.985;
       b.x += b.vx;
       b.y += b.vy;
-      // Wall bounds
       if (b.x - b.radius < 0) { b.x = b.radius; b.vx *= -0.5; }
       if (b.x + b.radius > w) { b.x = w - b.radius; b.vx *= -0.5; }
       if (b.y - b.radius < 0) { b.y = b.radius; b.vy *= -0.5; }
       if (b.y + b.radius > h) { b.y = h - b.radius; b.vy *= -0.5; }
     }
-    // Collision
     for (let i = 0; i < bubbles.length; i++) {
       for (let j = i + 1; j < bubbles.length; j++) {
         const a = bubbles[i], b = bubbles[j];
@@ -148,13 +140,11 @@ changeStr      b.vx *= 0.985;
       }
     }
     hoveredRef.current = hovered;
-    // Draw bubbles
     for (const b of bubbles) {
       const isHovered = b === hovered;
       const change = b.change;
       const isPositive = change > 0;
       const isNeutral = Math.abs(change) < 0.01;
-      // Bubble fill
       const baseH = isNeutral ? 220 : isPositive ? 145 : 0;
       const baseS = isNeutral ? 15 : isPositive ? 65 : 72;
       const baseL = isNeutral ? 20 : isPositive ? 25 : 25;
@@ -163,11 +153,9 @@ changeStr      b.vx *= 0.985;
       ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
       ctx.fillStyle = hslToRgba(baseH, baseS, baseL, alpha);
       ctx.fill();
-      // Border glow
       ctx.strokeStyle = hslToRgba(baseH, baseS, isHovered ? 55 : 40, isHovered ? 0.9 : 0.5);
       ctx.lineWidth = isHovered ? 2.5 : 1.5;
       ctx.stroke();
-      // Icon
       const iconSize = Math.min(b.radius * 0.6, 28);
       const img = b.token.iconUrl ? IMAGES_CACHE.get(b.token.iconUrl) : null;
       const hasIcon = img && img.complete && img.naturalWidth > 0;
@@ -183,7 +171,6 @@ changeStr      b.vx *= 0.985;
           ctx.restore();
         }
       } else {
-        // Fallback: colored circle with initials
         ctx.beginPath();
         ctx.arc(b.x, b.y - b.radius * 0.22, iconSize / 2, 0, Math.PI * 2);
         ctx.fillStyle = hslToRgba(baseH, baseS, 35, 0.8);
@@ -194,16 +181,15 @@ changeStr      b.vx *= 0.985;
         ctx.textBaseline = "middle";
         ctx.fillText(b.token.symbol?.slice(0, 2) || "?", b.x, b.y - b.radius * 0.22);
       }
-      // Always show symbol name
       ctx.fillStyle = "hsl(210, 20%, 92%)";
       ctx.font = `600 ${Math.max(8, b.radius * 0.26)}px 'Space Grotesk', sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       const nameY = b.y + b.radius * 0.15;
       ctx.fillText(b.token.symbol, b.x, nameY);
-      // Always show change percentage
       if (b.radius > 20) {
-        const changeStr = `${change > 0 ? "+" : ""}${Math.round(change)}%`;
+        const rounded = Math.round(change);
+        const changeStr = `${rounded > 0 ? "+" : ""}${rounded}%`;
         ctx.font = `500 ${Math.max(7, b.radius * 0.2)}px 'JetBrains Mono', monospace`;
         ctx.fillStyle = isNeutral
           ? hslToRgba(220, 15, 55, 1)
@@ -213,7 +199,6 @@ changeStr      b.vx *= 0.985;
         ctx.fillText(changeStr, b.x, nameY + b.radius * 0.28);
       }
     }
-    // Cursor
     if (canvas) {
       canvas.style.cursor = hovered ? "pointer" : "default";
     }
