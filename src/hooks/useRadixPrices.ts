@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-
 export interface RadixToken {
   address: string;
   symbol: string;
@@ -15,24 +14,17 @@ export interface RadixToken {
   diff24HUSD: number;
   diff7Days: number;
   diff7DaysUSD: number;
-  diff30Days?: number;
-  diff30DaysUSD?: number;
 }
-
-export type TimeFilter = "24h" | "7d" | "30d";
-
+export type TimeFilter = "24h" | "7d";
 const API_URL = "https://api.astrolescent.com/partner/hydraswap/prices";
-
 // Lista de símbolos explicitamente bloqueados
 const BLOCKED_SYMBOLS = new Set(["RANTS", "RUNES", "PYUSD", "MCM"]);
-
 // Lista de prioridade manual (ordem do topo para baixo)
 const PRIORITY_SYMBOLS = [
   "HYDR", "REDDICKS", "ASTRL", "DFP2", "HWBTC", "HETH", "ILIS", "WEFT", "EARLY", "OCI", 
   "WOWO", "FOTON", "HUG", "DELIVER", "HIT", "CASSIE", "DAN", "BOB", "BLUEBALLS", "MOX", 
   "EDG", "PHNX", "DUCKK", "RWA", "HNY", "DOUBT", "GREAT", "RBX", "RWT", "BOSS", "DINO"
 ];
-
 async function fetchPrices(): Promise<RadixToken[]> {
   const res = await fetch(API_URL);
   if (!res.ok) throw new Error("Failed to fetch prices");
@@ -80,13 +72,9 @@ async function fetchPrices(): Promise<RadixToken[]> {
     .map((t) => ({
       ...t,
       iconUrl: t.iconUrl || t.icon_url || "",
-      diff30Days: t.diff30Days ?? t.diff30DaysUSD ?? 0,
-      diff30DaysUSD: t.diff30DaysUSD ?? t.diff30Days ?? 0,
     })) as RadixToken[];
-
   // Sort by USD price descending (as liquidity proxy)
   all.sort((a, b) => b.tokenPriceUSD - a.tokenPriceUSD);
-
   // Implementação da lista de prioridade manual
   const priorityList = [...PRIORITY_SYMBOLS].reverse();
   for (const sym of priorityList) {
@@ -96,19 +84,15 @@ async function fetchPrices(): Promise<RadixToken[]> {
       all.unshift(token);
     }
   }
-
   return all;
 }
-
 export function getChange(token: RadixToken, filter: TimeFilter): number {
   switch (filter) {
     case "24h": return (token.diff24HUSD || 0) * 100;
     case "7d": return (token.diff7DaysUSD || 0) * 100;
-    case "30d": return (token.diff30DaysUSD || 0) * 100;
     default: return 0;
   }
 }
-
 export function useRadixPrices() {
   return useQuery({
     queryKey: ["radix-prices"],
