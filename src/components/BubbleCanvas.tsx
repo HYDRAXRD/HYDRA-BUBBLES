@@ -110,8 +110,7 @@ export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCa
       const cx = w / 2, cy = h / 2;
       b.vx += (cx - b.x) * 0.00008;
       b.vy += (cy - b.y) * 0.00008;
-      // Damping
-      b.vx *= 0.985;
+changeStr      b.vx *= 0.985;
       b.vy *= 0.985;
       b.x += b.vx;
       b.y += b.vy;
@@ -204,7 +203,7 @@ export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCa
       ctx.fillText(b.token.symbol, b.x, nameY);
       // Always show change percentage
       if (b.radius > 20) {
-        const changeStr = `${change > 0 ? "+" : ""}${change.toFixed(5)}%`;
+        const changeStr = `${change > 0 ? "+" : ""}${Math.round(change)}%`;
         ctx.font = `500 ${Math.max(7, b.radius * 0.2)}px 'JetBrains Mono', monospace`;
         ctx.fillStyle = isNeutral
           ? hslToRgba(220, 15, 55, 1)
