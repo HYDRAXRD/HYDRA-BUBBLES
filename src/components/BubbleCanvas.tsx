@@ -28,7 +28,7 @@ function loadImage(url: string): HTMLImageElement | null {
   if (!url || FAILED_IMAGES.has(url)) return null;
   if (IMAGES_CACHE.has(url)) return IMAGES_CACHE.get(url)!;
   const img = new Image();
-  img.crossOrigin = "anonymous";
+  // Don't set crossOrigin to avoid CORS issues - we just need to draw them
   img.src = url;
   img.onload = () => IMAGES_CACHE.set(url, img);
   img.onerror = () => FAILED_IMAGES.add(url);
