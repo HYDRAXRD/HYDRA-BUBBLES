@@ -1,7 +1,6 @@
 import { Search } from "lucide-react";
 import { TimeFilter } from "@/hooks/useRadixPrices";
 import hydraLogo from "@/assets/hydra-logo.png";
-
 interface HeaderProps {
   filter: TimeFilter;
   onFilterChange: (f: TimeFilter) => void;
@@ -9,13 +8,10 @@ interface HeaderProps {
   onSearchChange: (s: string) => void;
   tokenCount: number;
 }
-
 const filters: { label: string; value: TimeFilter }[] = [
   { label: "24H", value: "24h" },
   { label: "7D", value: "7d" },
-  { label: "30D", value: "30d" },
 ];
-
 export default function Header({
   filter,
   onFilterChange,
@@ -32,7 +28,6 @@ export default function Header({
             HYDRA <span className="text-gradient-primary">BUBBLES</span>
           </h1>
         </div>
-
         <div className="hidden md:flex flex-1 max-w-sm mx-4">
           <div className="relative w-full group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -45,7 +40,6 @@ export default function Header({
             />
           </div>
         </div>
-
         <div className="flex items-center gap-2">
           {filters.map((f) => (
             <button
@@ -65,7 +59,7 @@ export default function Header({
           </div>
         </div>
       </div>
-      
+
       {/* Mobile search */}
       <div className="md:hidden px-4 pb-2 border-t border-border/10 mt-1 pt-2">
         <div className="relative w-full">
