@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { TimeFilter } from "@/hooks/useRadixPrices";
+import hydraLogo from "@/assets/hydra-logo.png";
 
 interface HeaderProps {
   filter: TimeFilter;
