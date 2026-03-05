@@ -26,12 +26,16 @@ async function fetchPrices(): Promise<RadixToken[]> {
   if (!res.ok) throw new Error("Failed to fetch prices");
   const data = await res.json();
   
-  return Object.values(data)
-    .filter((t: any) => t.symbol && t.tokenPriceUSD > 0)
-    .map((t: any) => ({
+  const all = (Object.values(data) as any[])
+    .filter((t) => t.symbol && t.tokenPriceUSD > 0)
+    .map((t) => ({
       ...t,
       iconUrl: t.iconUrl || t.icon_url || "",
     })) as RadixToken[];
+
+  // Sort by USD price as proxy for liquidity, take top 100
+  all.sort((a, b) => b.tokenPriceUSD - a.tokenPriceUSD);
+  return all.slice(0, 100);
 }
 
 export function getChange(token: RadixToken, filter: TimeFilter): number {
