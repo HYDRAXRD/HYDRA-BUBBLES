@@ -22,13 +22,16 @@ const MIN_RADIUS = 22;
 const MAX_RADIUS = 80;
 const IMAGES_CACHE = new Map<string, HTMLImageElement>();
 
+const FAILED_IMAGES = new Set<string>();
+
 function loadImage(url: string): HTMLImageElement | null {
-  if (!url) return null;
+  if (!url || FAILED_IMAGES.has(url)) return null;
   if (IMAGES_CACHE.has(url)) return IMAGES_CACHE.get(url)!;
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.src = url;
   img.onload = () => IMAGES_CACHE.set(url, img);
+  img.onerror = () => FAILED_IMAGES.add(url);
   return null;
 }
 
