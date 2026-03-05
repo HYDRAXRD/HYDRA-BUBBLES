@@ -28,7 +28,7 @@ function loadImage(url: string): HTMLImageElement | null {
   if (!url || FAILED_IMAGES.has(url)) return null;
   if (IMAGES_CACHE.has(url)) return IMAGES_CACHE.get(url)!;
   const img = new Image();
-  img.crossOrigin = "anonymous";
+  // Don't set crossOrigin to avoid CORS issues - we just need to draw them
   img.src = url;
   img.onload = () => IMAGES_CACHE.set(url, img);
   img.onerror = () => FAILED_IMAGES.add(url);
@@ -201,35 +201,53 @@ export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCa
       ctx.stroke();
 
       // Icon
-      const iconSize = Math.min(b.radius * 0.55, 24);
+      const iconSize = Math.min(b.radius * 0.6, 28);
       const img = b.token.iconUrl ? IMAGES_CACHE.get(b.token.iconUrl) : null;
-      if (img && img.complete) {
-        ctx.save();
+      const hasIcon = img && img.complete && img.naturalWidth > 0;
+      
+      if (hasIcon) {
+        try {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(b.x, b.y - b.radius * 0.22, iconSize / 2, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(img, b.x - iconSize / 2, b.y - b.radius * 0.22 - iconSize / 2, iconSize, iconSize);
+          ctx.restore();
+        } catch {
+          // Canvas tainted - draw fallback
+          ctx.restore();
+        }
+      } else {
+        // Fallback: colored circle with initials
         ctx.beginPath();
-        ctx.arc(b.x, b.y - b.radius * 0.2, iconSize / 2, 0, Math.PI * 2);
-        ctx.clip();
-        ctx.drawImage(img, b.x - iconSize / 2, b.y - b.radius * 0.2 - iconSize / 2, iconSize, iconSize);
-        ctx.restore();
-      }
-
-      // Symbol text
-      if (b.radius > 25) {
+        ctx.arc(b.x, b.y - b.radius * 0.22, iconSize / 2, 0, Math.PI * 2);
+        ctx.fillStyle = hslToRgba(baseH, baseS, 35, 0.8);
+        ctx.fill();
         ctx.fillStyle = "hsl(210, 20%, 92%)";
-        ctx.font = `600 ${Math.max(9, b.radius * 0.28)}px 'Space Grotesk', sans-serif`;
+        ctx.font = `700 ${Math.max(8, iconSize * 0.45)}px 'Space Grotesk', sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        const textY = img && img.complete ? b.y + b.radius * 0.15 : b.y - b.radius * 0.1;
-        ctx.fillText(b.token.symbol, b.x, textY);
+        ctx.fillText(b.token.symbol?.slice(0, 2) || "?", b.x, b.y - b.radius * 0.22);
+      }
 
-        // Change percentage
+      // Always show symbol name
+      ctx.fillStyle = "hsl(210, 20%, 92%)";
+      ctx.font = `600 ${Math.max(8, b.radius * 0.26)}px 'Space Grotesk', sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const nameY = b.y + b.radius * 0.15;
+      ctx.fillText(b.token.symbol, b.x, nameY);
+
+      // Always show change percentage
+      if (b.radius > 20) {
         const changeStr = `${change > 0 ? "+" : ""}${change.toFixed(1)}%`;
-        ctx.font = `500 ${Math.max(8, b.radius * 0.22)}px 'JetBrains Mono', monospace`;
+        ctx.font = `500 ${Math.max(7, b.radius * 0.2)}px 'JetBrains Mono', monospace`;
         ctx.fillStyle = isNeutral
           ? hslToRgba(220, 15, 55, 1)
           : isPositive
             ? hslToRgba(145, 65, 55, 1)
             : hslToRgba(0, 72, 60, 1);
-        ctx.fillText(changeStr, b.x, textY + b.radius * 0.3);
+        ctx.fillText(changeStr, b.x, nameY + b.radius * 0.28);
       }
     }
 

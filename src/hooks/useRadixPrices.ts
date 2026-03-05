@@ -28,10 +28,7 @@ async function fetchPrices(): Promise<RadixToken[]> {
   
   const all = (Object.values(data) as any[])
     .filter((t) => {
-      // Must have symbol, price, and a valid icon URL
       if (!t.symbol || t.tokenPriceUSD <= 0) return false;
-      const icon = t.iconUrl || t.icon_url || "";
-      if (!icon || icon.trim() === "") return false;
       // Only Radix DLT tokens (resource_rdx addresses)
       if (t.address && !t.address.startsWith("resource_rdx")) return false;
       return true;
