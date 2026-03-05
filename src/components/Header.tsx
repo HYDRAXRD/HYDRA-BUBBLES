@@ -13,7 +13,6 @@ interface HeaderProps {
 const filters: { label: string; value: TimeFilter }[] = [
   { label: "24H", value: "24h" },
   { label: "7D", value: "7d" },
-  { label: "30D", value: "30d" },
 ];
 
 export default function Header({ filter, onFilterChange, search, onSearchChange, tokenCount }: HeaderProps) {
@@ -26,7 +25,6 @@ export default function Header({ filter, onFilterChange, search, onSearchChange,
             HYDRA <span className="text-gradient-primary">BUBBLES</span>
           </h1>
         </div>
-
         <div className="flex items-center gap-2">
           {filters.map((f) => (
             <button
@@ -42,7 +40,6 @@ export default function Header({ filter, onFilterChange, search, onSearchChange,
             </button>
           ))}
         </div>
-
         <div className="flex items-center gap-3">
           <div className="relative hidden md:block">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
