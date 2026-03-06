@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "hydrabubbles",
+  "account_id": "13c3523734e8da7d11f153258dfde811",
   "compatibility_date": "2026-03-06",
   "assets": {
     "directory": "./dist",
