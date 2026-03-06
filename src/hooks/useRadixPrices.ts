@@ -16,6 +16,7 @@ export interface RadixToken {
   diff7DaysUSD: number;
 }
 export type TimeFilter = "24h" | "7d";
+export type PriceUnit = "USD" | "XRD";
 const API_URL = "https://api.astrolescent.com/partner/hydraswap/prices";
 // Lista de símbolos explicitamente bloqueados
 const BLOCKED_SYMBOLS = new Set(["RANTS", "RUNES", "PYUSD", "MCM"]);
