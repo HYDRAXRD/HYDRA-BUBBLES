@@ -32,7 +32,7 @@ function loadImage(url: string): HTMLImageElement | null {
 function hslToRgba(h: number, s: number, l: number, a: number): string {
   return `hsla(${h}, ${s}%, ${l}%, ${a})`;
 }
-export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCanvasProps) {
+export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken }: BubbleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animRef = useRef<number>(0);
