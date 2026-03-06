@@ -45,6 +45,21 @@ export default function Header({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-md bg-secondary/50 border border-border/50 overflow-hidden">
+            {(["USD", "XRD"] as PriceUnit[]).map((u) => (
+              <button
+                key={u}
+                onClick={() => onPriceUnitChange(u)}
+                className={`px-2.5 py-1.5 text-[10px] font-bold tracking-wider transition-all ${
+                  priceUnit === u
+                    ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(37,99,235,0.3)]"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {u}
+              </button>
+            ))}
+          </div>
           {filters.map((f) => (
             <button
               key={f.value}
