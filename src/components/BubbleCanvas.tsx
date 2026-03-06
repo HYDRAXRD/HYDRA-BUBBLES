@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { RadixToken, getChange, TimeFilter } from "@/hooks/useRadixPrices";
+import { RadixToken, getChange, TimeFilter, PriceUnit } from "@/hooks/useRadixPrices";
 interface Bubble {
   token: RadixToken;
   x: number;
@@ -13,6 +13,7 @@ interface Bubble {
 interface BubbleCanvasProps {
   tokens: RadixToken[];
   filter: TimeFilter;
+  priceUnit: PriceUnit;
   onSelectToken: (token: RadixToken) => void;
 }
 const MIN_RADIUS = 22;
@@ -31,7 +32,7 @@ function loadImage(url: string): HTMLImageElement | null {
 function hslToRgba(h: number, s: number, l: number, a: number): string {
   return `hsla(${h}, ${s}%, ${l}%, ${a})`;
 }
-export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCanvasProps) {
+export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken }: BubbleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animRef = useRef<number>(0);
@@ -44,11 +45,11 @@ export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCa
     return () => window.removeEventListener("resize", onResize);
   }, []);
   useEffect(() => {
-    const changes = tokens.map((t) => Math.abs(getChange(t, filter)));
+    const changes = tokens.map((t) => Math.abs(getChange(t, filter, priceUnit)));
     const maxChange = Math.max(...changes, 1);
     const existing = new Map(bubblesRef.current.map((b) => [b.token.address, b]));
     bubblesRef.current = tokens.map((token, i) => {
-      const change = getChange(token, filter);
+      const change = getChange(token, filter, priceUnit);
       const absChange = Math.abs(change);
       const normalizedSize = Math.sqrt(absChange / maxChange);
       const targetRadius = MIN_RADIUS + normalizedSize * (MAX_RADIUS - MIN_RADIUS);
@@ -71,7 +72,7 @@ export default function BubbleCanvas({ tokens, filter, onSelectToken }: BubbleCa
         change,
       };
     });
-  }, [tokens, filter, canvasSize]);
+  }, [tokens, filter, priceUnit, canvasSize]);
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

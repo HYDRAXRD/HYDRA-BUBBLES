@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { TimeFilter } from "@/hooks/useRadixPrices";
+import { TimeFilter, PriceUnit } from "@/hooks/useRadixPrices";
 import hydraLogo from "@/assets/hydra-logo.png";
 interface HeaderProps {
   filter: TimeFilter;
@@ -7,6 +7,8 @@ interface HeaderProps {
   search: string;
   onSearchChange: (s: string) => void;
   tokenCount: number;
+  priceUnit: PriceUnit;
+  onPriceUnitChange: (u: PriceUnit) => void;
 }
 const filters: { label: string; value: TimeFilter }[] = [
   { label: "24H", value: "24h" },
@@ -18,6 +20,8 @@ export default function Header({
   search,
   onSearchChange,
   tokenCount,
+  priceUnit,
+  onPriceUnitChange,
 }: HeaderProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-surface-strong border-b border-primary/20">
@@ -41,6 +45,21 @@ export default function Header({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-md bg-secondary/50 border border-border/50 overflow-hidden">
+            {(["USD", "XRD"] as PriceUnit[]).map((u) => (
+              <button
+                key={u}
+                onClick={() => onPriceUnitChange(u)}
+                className={`px-2.5 py-1.5 text-[10px] font-bold tracking-wider transition-all ${
+                  priceUnit === u
+                    ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(37,99,235,0.3)]"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {u}
+              </button>
+            ))}
+          </div>
           {filters.map((f) => (
             <button
               key={f.value}

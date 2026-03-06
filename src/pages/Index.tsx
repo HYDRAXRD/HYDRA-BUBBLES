@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useRadixPrices, RadixToken, TimeFilter, getChange } from "@/hooks/useRadixPrices";
+import { useRadixPrices, RadixToken, TimeFilter, PriceUnit, getChange } from "@/hooks/useRadixPrices";
 import Header from "@/components/Header";
 import BubbleCanvas from "@/components/BubbleCanvas";
 import TokenModal from "@/components/TokenModal";
@@ -10,6 +10,7 @@ const Index = () => {
   const [filter, setFilter] = useState<TimeFilter>("24h");
   const [search, setSearch] = useState("");
   const [selectedToken, setSelectedToken] = useState<RadixToken | null>(null);
+  const [priceUnit, setPriceUnit] = useState<PriceUnit>("USD");
   const [page, setPage] = useState(0);
   // When filter changes, reset page
   const handleFilterChange = (f: TimeFilter) => {
@@ -64,8 +65,10 @@ const Index = () => {
         search={search}
         onSearchChange={(v) => { setSearch(v); setPage(0); }}
         tokenCount={filtered.length}
+        priceUnit={priceUnit}
+        onPriceUnitChange={setPriceUnit}
       />
-      <BubbleCanvas tokens={pageTokens} filter={filter} onSelectToken={setSelectedToken} />
+      <BubbleCanvas tokens={pageTokens} filter={filter} priceUnit={priceUnit} onSelectToken={setSelectedToken} />
       {totalPages > 1 && (
         <div
           className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-background/80 backdrop-blur border border-border rounded-full px-4 py-2 shadow-lg z-50"
