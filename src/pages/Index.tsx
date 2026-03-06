@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useRadixPrices, RadixToken, TimeFilter, getChange } from "@/hooks/useRadixPrices";
+import { useRadixPrices, RadixToken, TimeFilter, PriceUnit, getChange } from "@/hooks/useRadixPrices";
 import Header from "@/components/Header";
 import BubbleCanvas from "@/components/BubbleCanvas";
 import TokenModal from "@/components/TokenModal";
