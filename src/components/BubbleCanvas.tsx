@@ -13,6 +13,7 @@ interface Bubble {
 interface BubbleCanvasProps {
   tokens: RadixToken[];
   filter: TimeFilter;
+  priceUnit: PriceUnit;
   onSelectToken: (token: RadixToken) => void;
 }
 const MIN_RADIUS = 22;
