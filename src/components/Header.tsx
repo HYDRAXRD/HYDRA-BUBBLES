@@ -20,6 +20,8 @@ export default function Header({
   search,
   onSearchChange,
   tokenCount,
+  priceUnit,
+  onPriceUnitChange,
 }: HeaderProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-surface-strong border-b border-primary/20">
