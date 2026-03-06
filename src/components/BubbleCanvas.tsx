@@ -72,7 +72,7 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken 
         change,
       };
     });
-  }, [tokens, filter, canvasSize]);
+  }, [tokens, filter, priceUnit, canvasSize]);
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

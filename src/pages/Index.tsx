@@ -65,8 +65,10 @@ const Index = () => {
         search={search}
         onSearchChange={(v) => { setSearch(v); setPage(0); }}
         tokenCount={filtered.length}
+        priceUnit={priceUnit}
+        onPriceUnitChange={setPriceUnit}
       />
-      <BubbleCanvas tokens={pageTokens} filter={filter} onSelectToken={setSelectedToken} />
+      <BubbleCanvas tokens={pageTokens} filter={filter} priceUnit={priceUnit} onSelectToken={setSelectedToken} />
       {totalPages > 1 && (
         <div
           className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-background/80 backdrop-blur border border-border rounded-full px-4 py-2 shadow-lg z-50"
