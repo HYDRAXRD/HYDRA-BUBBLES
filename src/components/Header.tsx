@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { TimeFilter } from "@/hooks/useRadixPrices";
+import { TimeFilter, PriceUnit } from "@/hooks/useRadixPrices";
 import hydraLogo from "@/assets/hydra-logo.png";
 interface HeaderProps {
   filter: TimeFilter;
@@ -7,6 +7,8 @@ interface HeaderProps {
   search: string;
   onSearchChange: (s: string) => void;
   tokenCount: number;
+  priceUnit: PriceUnit;
+  onPriceUnitChange: (u: PriceUnit) => void;
 }
 const filters: { label: string; value: TimeFilter }[] = [
   { label: "24H", value: "24h" },
