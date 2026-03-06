@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { RadixToken, getChange, TimeFilter } from "@/hooks/useRadixPrices";
+import { RadixToken, getChange, TimeFilter, PriceUnit } from "@/hooks/useRadixPrices";
 interface Bubble {
   token: RadixToken;
   x: number;
