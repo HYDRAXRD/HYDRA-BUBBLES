@@ -87,7 +87,14 @@ async function fetchPrices(): Promise<RadixToken[]> {
   }
   return all;
 }
-export function getChange(token: RadixToken, filter: TimeFilter): number {
+export function getChange(token: RadixToken, filter: TimeFilter, unit: PriceUnit = "USD"): number {
+  if (unit === "XRD") {
+    switch (filter) {
+      case "24h": return (token.diff24H || 0) * 100;
+      case "7d": return (token.diff7Days || 0) * 100;
+      default: return 0;
+    }
+  }
   switch (filter) {
     case "24h": return (token.diff24HUSD || 0) * 100;
     case "7d": return (token.diff7DaysUSD || 0) * 100;
