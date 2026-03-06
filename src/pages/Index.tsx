@@ -10,6 +10,7 @@ const Index = () => {
   const [filter, setFilter] = useState<TimeFilter>("24h");
   const [search, setSearch] = useState("");
   const [selectedToken, setSelectedToken] = useState<RadixToken | null>(null);
+  const [priceUnit, setPriceUnit] = useState<PriceUnit>("USD");
   const [page, setPage] = useState(0);
   // When filter changes, reset page
   const handleFilterChange = (f: TimeFilter) => {
