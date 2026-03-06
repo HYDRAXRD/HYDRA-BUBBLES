@@ -45,11 +45,11 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken 
     return () => window.removeEventListener("resize", onResize);
   }, []);
   useEffect(() => {
-    const changes = tokens.map((t) => Math.abs(getChange(t, filter)));
+    const changes = tokens.map((t) => Math.abs(getChange(t, filter, priceUnit)));
     const maxChange = Math.max(...changes, 1);
     const existing = new Map(bubblesRef.current.map((b) => [b.token.address, b]));
     bubblesRef.current = tokens.map((token, i) => {
-      const change = getChange(token, filter);
+      const change = getChange(token, filter, priceUnit);
       const absChange = Math.abs(change);
       const normalizedSize = Math.sqrt(absChange / maxChange);
       const targetRadius = MIN_RADIUS + normalizedSize * (MAX_RADIUS - MIN_RADIUS);
