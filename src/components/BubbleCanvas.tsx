@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { RadixToken, getChange, TimeFilter, PriceUnit } from "@/hooks/useRadixPrices";
+import { RadixToken, getChange, getVolume, TimeFilter, PriceUnit, BubbleMode, VolumeFilter } from "@/hooks/useRadixPrices";
 interface Bubble {
   token: RadixToken;
   x: number;
@@ -9,11 +9,14 @@ interface Bubble {
   radius: number;
   targetRadius: number;
   change: number;
+  volumeRank: number; // 0..1, 1 = highest volume
 }
 interface BubbleCanvasProps {
   tokens: RadixToken[];
   filter: TimeFilter;
   priceUnit: PriceUnit;
+  bubbleMode: BubbleMode;
+  volumeFilter: VolumeFilter;
   onSelectToken: (token: RadixToken) => void;
 }
 const MIN_RADIUS = 22;
@@ -32,7 +35,7 @@ function loadImage(url: string): HTMLImageElement | null {
 function hslToRgba(h: number, s: number, l: number, a: number): string {
   return `hsla(${h}, ${s}%, ${l}%, ${a})`;
 }
-export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken }: BubbleCanvasProps) {
+export default function BubbleCanvas({ tokens, filter, priceUnit, bubbleMode, volumeFilter, onSelectToken }: BubbleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animRef = useRef<number>(0);
@@ -45,34 +48,71 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken 
     return () => window.removeEventListener("resize", onResize);
   }, []);
   useEffect(() => {
-    const changes = tokens.map((t) => Math.abs(getChange(t, filter, priceUnit)));
-    const maxChange = Math.max(...changes, 1);
     const existing = new Map(bubblesRef.current.map((b) => [b.token.address, b]));
-    bubblesRef.current = tokens.map((token, i) => {
-      const change = getChange(token, filter, priceUnit);
-      const absChange = Math.abs(change);
-      const normalizedSize = Math.sqrt(absChange / maxChange);
-      const targetRadius = MIN_RADIUS + normalizedSize * (MAX_RADIUS - MIN_RADIUS);
-      const prev = existing.get(token.address);
-      if (prev) {
-        prev.token = token;
-        prev.change = change;
-        prev.targetRadius = targetRadius;
-        return prev;
-      }
-      if (token.iconUrl) loadImage(token.iconUrl);
-      return {
-        token,
-        x: Math.random() * canvasSize.w,
-        y: Math.random() * canvasSize.h,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        radius: targetRadius * 0.5,
-        targetRadius,
-        change,
-      };
-    });
-  }, [tokens, filter, priceUnit, canvasSize]);
+
+    if (bubbleMode === "volume") {
+      // Size bubbles by volume rank
+      const volumes = tokens.map((t) => getVolume(t, volumeFilter));
+      const maxVol = Math.max(...volumes, 1);
+      bubblesRef.current = tokens.map((token) => {
+        const vol = getVolume(token, volumeFilter);
+        const normalizedSize = Math.sqrt(vol / maxVol);
+        const targetRadius = MIN_RADIUS + normalizedSize * (MAX_RADIUS - MIN_RADIUS);
+        const volumeRank = vol / maxVol;
+        const change = getChange(token, filter, priceUnit);
+        const prev = existing.get(token.address);
+        if (prev) {
+          prev.token = token;
+          prev.change = change;
+          prev.targetRadius = targetRadius;
+          prev.volumeRank = volumeRank;
+          return prev;
+        }
+        if (token.iconUrl) loadImage(token.iconUrl);
+        return {
+          token,
+          x: Math.random() * canvasSize.w,
+          y: Math.random() * canvasSize.h,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          radius: targetRadius * 0.5,
+          targetRadius,
+          change,
+          volumeRank,
+        };
+      });
+    } else {
+      // Original price-change mode
+      const changes = tokens.map((t) => Math.abs(getChange(t, filter, priceUnit)));
+      const maxChange = Math.max(...changes, 1);
+      bubblesRef.current = tokens.map((token) => {
+        const change = getChange(token, filter, priceUnit);
+        const absChange = Math.abs(change);
+        const normalizedSize = Math.sqrt(absChange / maxChange);
+        const targetRadius = MIN_RADIUS + normalizedSize * (MAX_RADIUS - MIN_RADIUS);
+        const prev = existing.get(token.address);
+        if (prev) {
+          prev.token = token;
+          prev.change = change;
+          prev.targetRadius = targetRadius;
+          prev.volumeRank = 0;
+          return prev;
+        }
+        if (token.iconUrl) loadImage(token.iconUrl);
+        return {
+          token,
+          x: Math.random() * canvasSize.w,
+          y: Math.random() * canvasSize.h,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          radius: targetRadius * 0.5,
+          targetRadius,
+          change,
+          volumeRank: 0,
+        };
+      });
+    }
+  }, [tokens, filter, priceUnit, bubbleMode, volumeFilter, canvasSize]);
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -141,14 +181,25 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken 
       }
     }
     hoveredRef.current = hovered;
+    // Read current bubbleMode from DOM attribute to avoid stale closure
+    const currentBubbleMode = canvas.dataset.bubbleMode as BubbleMode;
     for (const b of bubbles) {
       const isHovered = b === hovered;
-      const change = b.change;
-      const isPositive = change > 0;
-      const isNeutral = Math.abs(change) < 0.01;
-      const baseH = isNeutral ? 220 : isPositive ? 145 : 0;
-      const baseS = isNeutral ? 15 : isPositive ? 65 : 72;
-      const baseL = isNeutral ? 20 : isPositive ? 25 : 25;
+      let baseH: number, baseS: number, baseL: number;
+      if (currentBubbleMode === "volume") {
+        // Amber/orange gradient for volume mode: high vol = bright amber, low vol = muted orange
+        const rank = b.volumeRank;
+        baseH = 35 + rank * 10; // 35 (amber) to 45 (golden)
+        baseS = 60 + rank * 30; // 60..90%
+        baseL = 20 + rank * 15; // 20..35%
+      } else {
+        const change = b.change;
+        const isPositive = change > 0;
+        const isNeutral = Math.abs(change) < 0.01;
+        baseH = isNeutral ? 220 : isPositive ? 145 : 0;
+        baseS = isNeutral ? 15 : isPositive ? 65 : 72;
+        baseL = isNeutral ? 20 : isPositive ? 25 : 25;
+      }
       const alpha = isHovered ? 0.7 : 0.45;
       ctx.beginPath();
       ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
@@ -189,15 +240,31 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken 
       const nameY = b.y + b.radius * 0.15;
       ctx.fillText(b.token.symbol, b.x, nameY);
       if (b.radius > 20) {
-        const rounded = Math.round(change);
-        const changeStr = `${rounded > 0 ? "+" : ""}${rounded}%`;
-        ctx.font = `500 ${Math.max(7, b.radius * 0.2)}px 'JetBrains Mono', monospace`;
-        ctx.fillStyle = isNeutral
-          ? hslToRgba(220, 15, 55, 1)
-          : isPositive
-          ? hslToRgba(145, 65, 55, 1)
-          : hslToRgba(0, 72, 60, 1);
-        ctx.fillText(changeStr, b.x, nameY + b.radius * 0.28);
+        if (currentBubbleMode === "volume") {
+          // Show volume label in amber
+          const vol = b.token.volume24hUSD ?? 0;
+          const volStr = vol >= 1_000_000
+            ? `$${(vol / 1_000_000).toFixed(1)}M`
+            : vol >= 1_000
+            ? `$${(vol / 1_000).toFixed(0)}K`
+            : `$${vol.toFixed(0)}`;
+          ctx.font = `500 ${Math.max(7, b.radius * 0.2)}px 'JetBrains Mono', monospace`;
+          ctx.fillStyle = hslToRgba(40, 90, 70, 1);
+          ctx.fillText(volStr, b.x, nameY + b.radius * 0.28);
+        } else {
+          const change = b.change;
+          const isPositive = change > 0;
+          const isNeutral = Math.abs(change) < 0.01;
+          const rounded = Math.round(change);
+          const changeStr = `${rounded > 0 ? "+" : ""}${rounded}%`;
+          ctx.font = `500 ${Math.max(7, b.radius * 0.2)}px 'JetBrains Mono', monospace`;
+          ctx.fillStyle = isNeutral
+            ? hslToRgba(220, 15, 55, 1)
+            : isPositive
+            ? hslToRgba(145, 65, 55, 1)
+            : hslToRgba(0, 72, 60, 1);
+          ctx.fillText(changeStr, b.x, nameY + b.radius * 0.28);
+        }
       }
     }
     if (canvas) {
@@ -205,6 +272,12 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken 
     }
     animRef.current = requestAnimationFrame(animate);
   }, [canvasSize]);
+  // Keep bubbleMode accessible to animate loop via data attribute (avoids stale closure)
+  useEffect(() => {
+    if (canvasRef.current) {
+      canvasRef.current.dataset.bubbleMode = bubbleMode;
+    }
+  }, [bubbleMode]);
   useEffect(() => {
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
@@ -226,6 +299,7 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, onSelectToken 
   return (
     <canvas
       ref={canvasRef}
+      data-bubble-mode={bubbleMode}
       style={{ width: canvasSize.w, height: canvasSize.h }}
       className="block mt-14"
       onMouseMove={handleMouseMove}

@@ -14,9 +14,13 @@ export interface RadixToken {
   diff24HUSD: number;
   diff7Days: number;
   diff7DaysUSD: number;
+  volume24hUSD?: number;
+  volume7dUSD?: number;
 }
 export type TimeFilter = "24h" | "7d";
 export type PriceUnit = "USD" | "XRD";
+export type BubbleMode = "price" | "volume";
+export type VolumeFilter = "vol24h" | "vol7d";
 const API_URL = "https://api.astrolescent.com/partner/hydraswap/prices";
 // Lista de símbolos explicitamente bloqueados
 const BLOCKED_SYMBOLS = new Set(["RANTS", "RUNES", "PYUSD", "MCM"]);
@@ -76,6 +80,9 @@ async function fetchPrices(): Promise<RadixToken[]> {
     .map((t) => ({
       ...t,
       iconUrl: t.iconUrl || t.icon_url || "",
+      // Estimate volume using price * |change| as proxy if not provided by API
+      volume24hUSD: t.volume24hUSD ?? (t.tokenPriceUSD * Math.abs(t.diff24HUSD || 0) * 1000),
+      volume7dUSD: t.volume7dUSD ?? (t.tokenPriceUSD * Math.abs(t.diff7DaysUSD || 0) * 1000),
     })) as RadixToken[];
   // Sort by USD price descending (as liquidity proxy)
   all.sort((a, b) => b.tokenPriceUSD - a.tokenPriceUSD);
@@ -101,6 +108,13 @@ export function getChange(token: RadixToken, filter: TimeFilter, unit: PriceUnit
   switch (filter) {
     case "24h": return (token.diff24HUSD || 0) * 100;
     case "7d": return (token.diff7DaysUSD || 0) * 100;
+    default: return 0;
+  }
+}
+export function getVolume(token: RadixToken, volumeFilter: VolumeFilter): number {
+  switch (volumeFilter) {
+    case "vol24h": return token.volume24hUSD ?? 0;
+    case "vol7d": return token.volume7dUSD ?? 0;
     default: return 0;
   }
 }

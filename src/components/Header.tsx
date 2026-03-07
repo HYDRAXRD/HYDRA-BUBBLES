@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { TimeFilter, PriceUnit } from "@/hooks/useRadixPrices";
+import { TimeFilter, PriceUnit, BubbleMode, VolumeFilter } from "@/hooks/useRadixPrices";
 import hydraLogo from "@/assets/hydra-logo.png";
 interface HeaderProps {
   filter: TimeFilter;
@@ -9,6 +9,10 @@ interface HeaderProps {
   tokenCount: number;
   priceUnit: PriceUnit;
   onPriceUnitChange: (u: PriceUnit) => void;
+  bubbleMode: BubbleMode;
+  onBubbleModeChange: (mode: BubbleMode) => void;
+  volumeFilter: VolumeFilter;
+  onVolumeFilterChange: (vf: VolumeFilter) => void;
 }
 const filters: { label: string; value: TimeFilter }[] = [
   { label: "24H", value: "24h" },
@@ -22,6 +26,10 @@ export default function Header({
   tokenCount,
   priceUnit,
   onPriceUnitChange,
+  bubbleMode,
+  onBubbleModeChange,
+  volumeFilter,
+  onVolumeFilterChange,
 }: HeaderProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-surface-strong border-b border-primary/20">
@@ -45,21 +53,50 @@ export default function Header({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-md bg-secondary/50 border border-border/50 overflow-hidden">
-            {(["USD", "XRD"] as PriceUnit[]).map((u) => (
-              <button
-                key={u}
-                onClick={() => onPriceUnitChange(u)}
-                className={`px-2.5 py-1.5 text-[10px] font-bold tracking-wider transition-all ${
-                  priceUnit === u
-                    ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(37,99,235,0.3)]"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {u}
-              </button>
-            ))}
+          {/* VOL toggle */}
+          <div className="flex flex-col items-center">
+            <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5 leading-none">VOL</span>
+            <div className="flex items-center rounded-md bg-secondary/50 border border-border/50 overflow-hidden">
+              {(["vol24h", "vol7d"] as VolumeFilter[]).map((vf) => (
+                <button
+                  key={vf}
+                  onClick={() => {
+                    onVolumeFilterChange(vf);
+                    if (bubbleMode !== "volume") onBubbleModeChange("volume");
+                    else if (volumeFilter === vf) onBubbleModeChange("price");
+                  }}
+                  title={vf === "vol24h" ? "Sort bubbles by 24h volume" : "Sort bubbles by 7-day volume"}
+                  className={`px-2.5 py-1.5 text-[10px] font-bold tracking-wider transition-all ${
+                    bubbleMode === "volume" && volumeFilter === vf
+                      ? "bg-amber-500 text-white shadow-[0_0_10px_rgba(245,158,11,0.4)]"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {vf === "vol24h" ? "24H" : "7D"}
+                </button>
+              ))}
+            </div>
           </div>
+          {/* XRD/USD toggle */}
+          <div className="flex flex-col items-center">
+            <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5 leading-none">Price</span>
+            <div className="flex items-center rounded-md bg-secondary/50 border border-border/50 overflow-hidden">
+              {(["USD", "XRD"] as PriceUnit[]).map((u) => (
+                <button
+                  key={u}
+                  onClick={() => onPriceUnitChange(u)}
+                  className={`px-2.5 py-1.5 text-[10px] font-bold tracking-wider transition-all ${
+                    priceUnit === u
+                      ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(37,99,235,0.3)]"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {u}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* 24H / 7D filter buttons */}
           {filters.map((f) => (
             <button
               key={f.value}
