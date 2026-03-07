@@ -20,9 +20,11 @@ export type PriceUnit = "USD" | "XRD";
 const API_URL = "https://api.astrolescent.com/partner/hydraswap/prices";
 // Lista de símbolos explicitamente bloqueados
 const BLOCKED_SYMBOLS = new Set(["RANTS", "RUNES", "PYUSD", "MCM"]);
+// Símbolos que começam com X mas devem ser permitidos
+const X_SYMBOL_WHITELIST = new Set(["XRD"]);
 // Lista de prioridade manual (ordem do topo para baixo)
 const PRIORITY_SYMBOLS = [
-  "HYDR", "REDDICKS", "ASTRL", "DFP2", "HWBTC", "HETH", "ILIS", "WEFT", "EARLY", "OCI", 
+  "XRD", "HYDR", "REDDICKS", "ASTRL", "DFP2", "HWBTC", "HETH", "ILIS", "WEFT", "EARLY", "OCI", 
   "WOWO", "FOTON", "HUG", "DELIVER", "HIT", "CASSIE", "DAN", "BOB", "BLUEBALLS", "MOX", 
   "EDG", "PHNX", "DUCKK", "RWA", "HNY", "DOUBT", "GREAT", "RBX", "RWT", "BOSS", "DINO"
 ];
@@ -58,7 +60,8 @@ async function fetchPrices(): Promise<RadixToken[]> {
       if (sym.includes("LSU") || nm.includes("LSU")) return false;
       
       // Bloqueio 4: qualquer token cujo símbolo comece com X
-      if (sym.startsWith("X")) return false;
+      // (exceto tokens na whitelist, como XRD)
+      if (sym.startsWith("X") && !X_SYMBOL_WHITELIST.has(sym)) return false;
       
       // Bloqueio 5: remover duplicados por endereço
       if (t.address && seenAddresses.has(t.address)) return false;
