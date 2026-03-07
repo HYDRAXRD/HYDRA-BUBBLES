@@ -241,13 +241,12 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, bubbleMode, vo
       ctx.fillText(b.token.symbol, b.x, nameY);
       if (b.radius > 20) {
         if (currentBubbleMode === "volume") {
-          // Show volume label in amber
-          const vol = b.token.volume24hUSD ?? 0;
-          const volStr = vol >= 1_000_000
-            ? `$${(vol / 1_000_000).toFixed(1)}M`
-            : vol >= 1_000
-            ? `$${(vol / 1_000).toFixed(0)}K`
-            : `$${vol.toFixed(0)}`;
+  const vol = getVolume(b.token, volumeFilter);  // ← corrigido: usa 24H ou 7D
+  const volStr = vol >= 1_000_000
+    ? `${(vol / 1_000_000).toFixed(1)}M`
+    : vol >= 1_000
+    ? `${(vol / 1_000).toFixed(0)}K`
+    : `${vol.toFixed(0)}`;
           ctx.font = `500 ${Math.max(7, b.radius * 0.2)}px 'JetBrains Mono', monospace`;
           ctx.fillStyle = hslToRgba(40, 90, 70, 1);
           ctx.fillText(volStr, b.x, nameY + b.radius * 0.28);
