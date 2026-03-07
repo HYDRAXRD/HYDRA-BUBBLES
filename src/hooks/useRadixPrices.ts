@@ -81,8 +81,8 @@ async function fetchPrices(): Promise<RadixToken[]> {
       ...t,
       iconUrl: t.iconUrl || t.icon_url || "",
       // Estimate volume using price * |change| as proxy if not provided by API
-      volume24hUSD: t.volume24hUSD ?? (t.tokenPriceUSD * Math.abs(t.diff24HUSD || 0) * 1000),
-      volume7dUSD: t.volume7dUSD ?? (t.tokenPriceUSD * Math.abs(t.diff7DaysUSD || 0) * 1000),
+     volume24hUSD: Number(t.volume24H ?? 0),
+     volume7dUSD: Number(t.volume7D ?? 0),
     })) as RadixToken[];
   // Sort by USD price descending (as liquidity proxy)
   all.sort((a, b) => b.tokenPriceUSD - a.tokenPriceUSD);
