@@ -23,7 +23,7 @@ export type BubbleMode = "price" | "volume";
 export type VolumeFilter = "vol24h" | "vol7d";
 const API_URL = "https://api.astrolescent.com/partner/hydraswap/prices";
 // Lista de símbolos explicitamente bloqueados
-const BLOCKED_SYMBOLS = new Set(["RANTS", "RUNES", "PYUSD", "MCM"]);
+const BLOCKED_SYMBOLS = new Set(["HUGD", "LOVE", "TIME", "MARIO", "USA", "MEME", "SAFARI", "GROK", "TROLL", "BDC", "TECNR", "RON2DLT", "ONE", "R2025", "COE", "CHOW", "RDV", "DOR", "BLSS", "KPT", "ABSIN", "YUGI", "BREAK", "PZA", "MNC", "ROBO", "SLG", "BONK", "AND18", "BEER", "GPT", "LEXA", "CMON","LUCK", "BOSS", "IPT", "ONE", "PANDA", "KPT", "RANTS", "RUNES", "PYUSD", "MCM"]);
 // Símbolos que começam com X mas devem ser permitidos
 const X_SYMBOL_WHITELIST = new Set(["XRD"]);
 // Lista de prioridade manual (ordem do topo para baixo)
