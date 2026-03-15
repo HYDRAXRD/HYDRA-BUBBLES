@@ -12,6 +12,7 @@ import {
 import Header from "@/components/Header";
 import BubbleCanvas from "@/components/BubbleCanvas";
 import TokenModal from "@/components/TokenModal";
+import { WalletPortfolio } from "@/components/WalletPortfolio";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
 const PAGE_SIZE = 100;
@@ -199,7 +200,13 @@ const Index = () => {
         />
       )}
 
-      {/* Rodapé com redes sociais */}
+      {/
+            <WalletPortfolio
+        tokens={allTokens ?? []}
+        priceUnit={priceUnit}
+        filter={filter}
+      />
+* Rodapé com redes sociais */}
       <div className="flex items-center justify-center gap-4 px-6 py-4 border-t border-border/30 bg-background/80 backdrop-blur-sm z-10">
         {SOCIAL_LINKS.map((link) => (
           <a
