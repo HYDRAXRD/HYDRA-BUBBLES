@@ -153,7 +153,7 @@ const Index = () => {
         onVolumeFilterChange={setVolumeFilter}
       />
 
-      <div className="flex-1 relative">
+      <div className="flex-1 relative mt-24 md:mt-14">
         <BubbleCanvas
           tokens={pageTokens}
           filter={filter}

@@ -36,16 +36,23 @@ function hslToRgba(h: number, s: number, l: number, a: number): string {
   return `hsla(${h}, ${s}%, ${l}%, ${a})`;
 }
 export default function BubbleCanvas({ tokens, filter, priceUnit, bubbleMode, volumeFilter, onTokenClick }: BubbleCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animRef = useRef<number>(0);
   const mouseRef = useRef<{ x: number; y: number } | null>(null);
   const hoveredRef = useRef<Bubble | null>(null);
-  const [canvasSize, setCanvasSize] = useState({ w: window.innerWidth, h: window.innerHeight - 56 });
+  const [canvasSize, setCanvasSize] = useState({ w: window.innerWidth, h: window.innerHeight });
   useEffect(() => {
-    const onResize = () => setCanvasSize({ w: window.innerWidth, h: window.innerHeight - 56 });
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    const el = containerRef.current;
+    if (!el) return;
+    setCanvasSize({ w: el.clientWidth, h: el.clientHeight });
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setCanvasSize({ w: width, h: height });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
   useEffect(() => {
     const existing = new Map(bubblesRef.current.map((b) => [b.token.address, b]));
@@ -296,14 +303,16 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, bubbleMode, vo
     }
   }, [onTokenClick]);
   return (
-    <canvas
-      ref={canvasRef}
-      data-bubble-mode={bubbleMode}
-      style={{ width: canvasSize.w, height: canvasSize.h }}
-      className="block mt-14"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-    />
+    <div ref={containerRef} className="absolute inset-0">
+      <canvas
+        ref={canvasRef}
+        data-bubble-mode={bubbleMode}
+        style={{ width: canvasSize.w, height: canvasSize.h }}
+        className="block"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
+      />
+    </div>
   );
 }
