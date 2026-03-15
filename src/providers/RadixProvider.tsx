@@ -32,7 +32,7 @@ export const RadixProvider = ({ children }: { children: React.ReactNode }) => {
       applicationName: "Hydra Bubbles",
       applicationVersion: "1.0.0",
       dAppDefinitionAddress:
-        "account_rdx12xhz8r4t4l9ghkuzu5frdl4x5xalhu2d9uqwv2ag5trdcxrjhyyuz5",
+        "account_rdx129epnttl30t5v6v9rudh8udrwwmkskyxtuxhf58pxv7duatsv3rkm8",
     });
 
     rdtRef.current = rdt;
