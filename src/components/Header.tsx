@@ -1,6 +1,16 @@
 import { Search } from "lucide-react";
 import { TimeFilter, PriceUnit, BubbleMode, VolumeFilter } from "@/hooks/useRadixPrices";
 import hydraLogo from "@/assets/hydra-logo.png";
+
+// Tell TypeScript about the Radix web component
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      "radix-connect-button": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+    }
+  }
+}
+
 interface HeaderProps {
   filter: TimeFilter;
   onFilterChange: (f: TimeFilter) => void;
@@ -113,9 +123,10 @@ export default function Header({
           <div className="hidden sm:block ml-2 px-3 py-1.5 rounded-md bg-secondary/30 text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
             {tokenCount} Tokens
           </div>
+          {/* Radix Wallet Connect Button */}
+          <radix-connect-button />
         </div>
       </div>
-
       {/* Mobile search */}
       <div className="md:hidden px-4 pb-2 border-t border-border/10 mt-1 pt-2">
         <div className="relative w-full">
