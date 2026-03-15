@@ -1,8 +1,9 @@
-import { RadixToken, getChange, TimeFilter } from "@/hooks/useRadixPrices";
+import { RadixToken, getChange, TimeFilter, PriceUnit } from "@/hooks/useRadixPrices";
 import { X, ExternalLink, TrendingUp, TrendingDown, ShoppingCart } from "lucide-react";
 interface TokenModalProps {
   token: RadixToken;
   filter: TimeFilter;
+  priceUnit?: PriceUnit;
   onClose: () => void;
 }
 const SWAP_URL = "https://hydraxrd.com/swap";

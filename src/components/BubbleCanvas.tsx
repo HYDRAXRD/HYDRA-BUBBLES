@@ -17,7 +17,7 @@ interface BubbleCanvasProps {
   priceUnit: PriceUnit;
   bubbleMode: BubbleMode;
   volumeFilter: VolumeFilter;
-  onSelectToken: (token: RadixToken) => void;
+  onTokenClick: (token: RadixToken) => void;
 }
 const MIN_RADIUS = 22;
 const MAX_RADIUS = 80;
@@ -35,7 +35,7 @@ function loadImage(url: string): HTMLImageElement | null {
 function hslToRgba(h: number, s: number, l: number, a: number): string {
   return `hsla(${h}, ${s}%, ${l}%, ${a})`;
 }
-export default function BubbleCanvas({ tokens, filter, priceUnit, bubbleMode, volumeFilter, onSelectToken }: BubbleCanvasProps) {
+export default function BubbleCanvas({ tokens, filter, priceUnit, bubbleMode, volumeFilter, onTokenClick }: BubbleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animRef = useRef<number>(0);
@@ -292,9 +292,9 @@ export default function BubbleCanvas({ tokens, filter, priceUnit, bubbleMode, vo
   }, []);
   const handleClick = useCallback(() => {
     if (hoveredRef.current) {
-      onSelectToken(hoveredRef.current.token);
+      onTokenClick(hoveredRef.current.token);
     }
-  }, [onSelectToken]);
+  }, [onTokenClick]);
   return (
     <canvas
       ref={canvasRef}
