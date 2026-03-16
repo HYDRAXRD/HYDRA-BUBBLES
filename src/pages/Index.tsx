@@ -200,7 +200,7 @@ const Index = () => {
         />
       )}
 
-      {/
+      {/*
             <WalletPortfolio
         tokens={allTokens ?? []}
         priceUnit={priceUnit}
