@@ -66,48 +66,53 @@ export function useWalletBalances(tokens: RadixToken[]) {
     const run = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        const combined: Record<string, number> = {};
-        for (const account of accounts) {
-          const balances = await fetchAccountFungibles(account.address);
-          for (const [addr, amt] of Object.entries(balances)) {
-            combined[addr] = (combined[addr] ?? 0) + amt;
+        const balances = await fetchAccountFungibles(accounts[0].address);
+
+        const walletAssets: WalletAsset[] = [];
+
+        for (const token of tokens) {
+          const amount = balances[token.address] ?? 0;
+          if (amount > 0) {
+            const valueUSD = amount * token.priceUSD;
+            walletAssets.push({
+              resourceAddress: token.address,
+              symbol: token.symbol,
+              name: token.name,
+              iconUrl: token.iconUrl,
+              amount,
+              priceUSD: token.priceUSD,
+              priceXRD: token.priceXRD,
+              valueUSD,
+              change24hUSD: token.change24hUSD,
+              change7dUSD: token.change7dUSD,
+            });
           }
         }
 
-        if (cancelled) return;
+        // Sort by value (highest first)
+        walletAssets.sort((a, b) => b.valueUSD - a.valueUSD);
 
-        const result: WalletAsset[] = [];
-        for (const [resourceAddress, amount] of Object.entries(combined)) {
-          const token = tokens.find((t) => t.address === resourceAddress);
-          if (!token) continue;
-
-          result.push({
-            resourceAddress,
-            symbol: token.symbol,
-            name: token.name,
-            iconUrl: token.iconUrl || token.icon_url || "",
-            amount,
-            priceUSD: token.tokenPriceUSD,
-            priceXRD: token.tokenPriceXRD,
-            valueUSD: amount * token.tokenPriceUSD,
-            change24hUSD: (token.diff24HUSD ?? 0) * 100,
-            change7dUSD: (token.diff7DaysUSD ?? 0) * 100,
-          });
+        if (!cancelled) {
+          setAssets(walletAssets);
         }
-
-        result.sort((a, b) => b.valueUSD - a.valueUSD);
-        setAssets(result);
       } catch (err) {
-        if (!cancelled) setError("Erro ao buscar saldos da carteira");
-        console.error(err);
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to fetch balances");
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     run();
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, [connected, accounts, tokens]);
 
   return { assets, loading, error };
