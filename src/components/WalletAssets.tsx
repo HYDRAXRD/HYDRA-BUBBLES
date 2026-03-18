@@ -34,14 +34,7 @@ const WalletAssets: React.FC = () => {
     return (
       <div className="wallet-assets">
         <div className="wallet-message">
-          <p>No assets found in your wallet</p>
-        </div>
-      </div>
-    );
-  }
-
-  const formatNumber = (num: number, decimals: number = 2): string => {
-    return new Intl.NumberFormat('en-US', {
+          // Removed: message for no assets
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     }).format(num);
