@@ -8,15 +8,7 @@ const WalletAssets: React.FC = () => {
   const { tokens, loading: pricesLoading } = useRadixPrices();
   const { assets, loading: balancesLoading, error } = useWalletBalances(tokens);
 
-  if (!connected) {
-    return (
-      <div className="wallet-assets">
-        <div className="wallet-message">
-          <p>Connect your Radix wallet to view your assets</p>
-        </div>
-      </div>
-    );
-  }
+// Removed: message asking to connect wallet
 
   if (pricesLoading || balancesLoading) {
     return (
