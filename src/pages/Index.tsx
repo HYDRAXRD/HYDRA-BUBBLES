@@ -201,7 +201,7 @@ const Index = () => {
         />
       )}
 
-* Rodapé com redes sociais */}
+{/* Rodapé com redes sociais */}
             <WalletAssets />
       <div className="flex items-center justify-center gap-4 px-6 py-4 border-t border-border/30 bg-background/80 backdrop-blur-sm z-10">
         {SOCIAL_LINKS.map((link) => (
